@@ -25,14 +25,15 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 
-const MOBILE_APK_ARM64 =
-  "https://github.com/chila254/maxstream/releases/latest/download/maxstream-arm64-v8a.apk";
-const MOBILE_APK_ARM32 =
-  "https://github.com/chila254/maxstream/releases/latest/download/maxstream-armeabi-v7a.apk";
-const MOBILE_APK_X86 =
-  "https://github.com/chila254/maxstream/releases/latest/download/maxstream-x86_64.apk";
-const TV_APK =
-  "https://github.com/chila254/maxstream/releases/latest/download/maxstream-tv.apk";
+const GITHUB_REPO = "https://github.com/TeamMaxStream/MaxStream";
+const RELEASES_URL = `${GITHUB_REPO}/releases`;
+const LATEST_RELEASE = `${RELEASES_URL}/latest/download`;
+const MOBILE_APK_ARM64 = `${LATEST_RELEASE}/maxstream-arm64-v8a.apk`;
+const MOBILE_APK_ARM32 = `${LATEST_RELEASE}/maxstream-armeabi-v7a.apk`;
+const MOBILE_APK_X86 = `${LATEST_RELEASE}/maxstream-x86_64.apk`;
+const TV_APK = `${LATEST_RELEASE}/maxstream-tv.apk`;
+const WINDOWS_MSI = `${LATEST_RELEASE}/MaxStream-Desktop.msi`;
+const WINDOWS_EXE = `${LATEST_RELEASE}/MaxStream-Dex.exe`;
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -264,7 +265,7 @@ function Sidebar({
 
         <div className="mt-8 space-y-1">
           <a
-            href="https://github.com/chila254/maxstream"
+            href="https://github.com/TeamMaxStream/MaxStream"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted transition-all hover:bg-border/50 hover:text-foreground"
@@ -273,7 +274,7 @@ function Sidebar({
             GitHub
           </a>
           <a
-            href="https://github.com/chila254/maxstream/releases"
+            href="https://github.com/TeamMaxStream/MaxStream/releases"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted transition-all hover:bg-border/50 hover:text-foreground"
@@ -299,7 +300,7 @@ function Sidebar({
           className="flex w-full items-center justify-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-brand-dark hover:shadow-lg hover:shadow-brand/25"
         >
           <Download className="h-4 w-4" />
-          Download APKs
+          Download apps
         </a>
         <a
           href={TV_APK}
@@ -307,6 +308,13 @@ function Sidebar({
         >
           <Tv className="h-4 w-4" />
           Android TV
+        </a>
+        <a
+          href={WINDOWS_MSI}
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-xs font-medium text-muted transition-all hover:border-brand/30 hover:text-foreground"
+        >
+          <MonitorPlay className="h-4 w-4" />
+          Windows PC
         </a>
       </div>
     </aside>
@@ -335,7 +343,7 @@ function Hero() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
           </span>
-          <span className="text-muted">v1.6.0 — Voice search, live recommendations & TV subtitles</span>
+          <span className="text-muted">v1.8.0 — Shared watch history, TV Library & Windows desktop</span>
         </div>
 
         {/* Headline */}
@@ -355,8 +363,8 @@ function Hero() {
           className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg animate-fade-in-up"
           style={{ animationDelay: "200ms" }}
         >
-          Watch on your phone, tablet, or Android TV. Sign in to sync your
-          watchlist and progress across devices.
+          Watch on your phone, tablet, Android TV, or Windows PC. Sign in once
+          to sync your watchlist, watch history, and progress everywhere.
         </p>
 
         {/* CTA Buttons */}
@@ -379,6 +387,13 @@ function Hero() {
           >
             <Tv className="h-5 w-5" />
             Download for Android TV
+          </a>
+          <a
+            href={WINDOWS_MSI}
+            className="group flex w-full items-center justify-center gap-2.5 rounded-full border border-border bg-card/50 px-8 py-4 text-sm font-semibold backdrop-blur-sm transition-all hover:border-brand/30 hover:bg-card sm:w-auto sm:text-base"
+          >
+            <MonitorPlay className="h-5 w-5" />
+            Download for Windows
           </a>
         </div>
 
@@ -412,9 +427,21 @@ const FEATURES = [
   },
   {
     icon: RefreshCw,
-    title: "Cloud sync",
-    desc: "Your watchlist, watch history, and continue-watching sync between your phone and TV in real time.",
+    title: "One library everywhere",
+    desc: "Watchlist, watch history, and continue-watching sync in real time across phone, Android TV, and Windows. Deletions and clear-all follow you too.",
     gradient: "from-blue-500/20 to-cyan-500/20",
+  },
+  {
+    icon: MonitorPlay,
+    title: "Native Windows app",
+    desc: "A proper desktop player with mpv-powered playback, offline downloads, and the same synced library as mobile and TV.",
+    gradient: "from-sky-500/20 to-blue-500/20",
+  },
+  {
+    icon: Tv,
+    title: "TV Library & history",
+    desc: "Watchlist and watch history live together in a D-pad-friendly Library with reliable focus and one-tap resume.",
+    gradient: "from-cyan-500/20 to-teal-500/20",
   },
   {
     icon: Zap,
@@ -425,7 +452,7 @@ const FEATURES = [
   {
     icon: Shield,
     title: "Your account, your data",
-    desc: "Sign in with email or device code. Your watchlist and progress sync across your phone and TV.",
+    desc: "Sign in with email or device code. Your watchlist, history, and downloads stay private to your profile.",
     gradient: "from-green-500/20 to-emerald-500/20",
   },
   {
@@ -437,7 +464,7 @@ const FEATURES = [
   {
     icon: Play,
     title: "Continue watching",
-    desc: "Pick up right where you left off with per-episode progress and automatic next-episode playback.",
+    desc: "Pick up right where you left off on any device with per-episode progress and automatic next-episode playback.",
     gradient: "from-indigo-500/20 to-violet-500/20",
   },
 ];
@@ -569,7 +596,8 @@ function DownloadSection() {
             <span className="gradient-text-static">MaxStream</span>
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base text-muted sm:text-lg">
-            Free for Android phones and Android TV. Open-source on GitHub.
+            Free for Android phones, Android TV, and Windows. Open-source on
+            GitHub.
           </p>
         </RevealDiv>
 
@@ -580,7 +608,7 @@ function DownloadSection() {
           >
             <div className="absolute inset-0 rounded-full animate-glow-ring" />
             <Download className="h-5 w-5" />
-            Download APK
+            Choose your download
             <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </button>
         </RevealDiv>
@@ -593,7 +621,7 @@ function DownloadSection() {
           onClick={closeDialog}
         >
           <div
-            className="w-full max-w-md overflow-hidden rounded-3xl border border-border/50 bg-background shadow-2xl animate-fade-in-up"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-border/50 bg-background shadow-2xl animate-fade-in-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Dialog header with gradient */}
@@ -601,8 +629,8 @@ function DownloadSection() {
               <div className="absolute inset-0 bg-gradient-to-r from-brand/5 via-transparent to-brand/5" />
               <div className="relative flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-bold">Choose your APK</h3>
-                  <p className="mt-0.5 text-xs text-muted">Select the version for your device</p>
+                  <h3 className="text-lg font-bold">Choose your download</h3>
+                  <p className="mt-0.5 text-xs text-muted">Version 1.8.0 · Select the build for your device</p>
                 </div>
                 <button
                   onClick={closeDialog}
@@ -694,6 +722,47 @@ function DownloadSection() {
                   <Download className="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-brand" />
                 </a>
               </div>
+
+              {/* Windows section */}
+              <div className="border-t border-border/50 pt-5">
+                <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
+                  <MonitorPlay className="h-3.5 w-3.5" />
+                  Windows
+                </p>
+                <div className="space-y-2">
+                  <a
+                    href={WINDOWS_MSI}
+                    className="group flex items-center gap-3 rounded-xl border border-brand/30 bg-brand/5 p-3 transition-all duration-300 hover:border-brand/50 hover:scale-[1.01] hover:shadow-lg hover:shadow-brand/10"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
+                      <MonitorPlay className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold">Windows 10/11 · 64-bit</p>
+                        <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand uppercase">
+                          Recommended
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-muted">MSI installer — best for most PCs</p>
+                    </div>
+                    <Download className="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-brand" />
+                  </a>
+                  <a
+                    href={WINDOWS_EXE}
+                    className="group flex items-center gap-3 rounded-xl border border-border bg-card/50 p-3 transition-all duration-300 hover:border-brand/30 hover:bg-card hover:scale-[1.01] hover:shadow-lg hover:shadow-brand/10"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-border/50 text-muted transition-colors group-hover:bg-brand/10 group-hover:text-brand">
+                      <MonitorPlay className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold">Windows EXE installer</p>
+                      <p className="mt-0.5 text-xs text-muted">Single-file setup — the same full desktop app</p>
+                    </div>
+                    <Download className="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-brand" />
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -709,11 +778,15 @@ const FAQ_ITEMS = [
   },
   {
     q: "What devices are supported?",
-    a: "MaxStream runs on Android phones and tablets (Android 5.0+) and Android TV devices. An iOS version is not available yet.",
+    a: "MaxStream runs on Android phones and tablets (Android 5.0+), Android TV devices, and Windows 10/11 PCs (64-bit). iOS is not supported.",
+  },
+  {
+    q: "Does MaxStream have a Windows app?",
+    a: "Yes. The native Windows desktop app uses mpv for playback, supports offline downloads, and shares your watchlist and watch history with the mobile and TV apps. Download the MSI installer for most PCs, or the EXE installer for a single-file setup.",
   },
   {
     q: "Do I need an account?",
-    a: "You need to sign in (via email or device code) to use cloud sync. Without signing in you can still browse, but your watchlist and progress won't sync.",
+    a: "You need to sign in (via email or device code) to use cloud sync. Without signing in you can still browse, but your watchlist, watch history, and progress won't sync.",
   },
   {
     q: "How do I install the APK?",
@@ -725,7 +798,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How do I update?",
-    a: "The app checks GitHub for new releases automatically. You'll get a prompt to download and install the update in-app.",
+    a: "On Android and Android TV, the app checks GitHub for new releases automatically and prompts you to install updates in-app. The Windows app can also download and install updates itself, or you can run the latest MSI/EXE installer over the existing install.",
   },
 ];
 
@@ -815,11 +888,12 @@ function Footer() {
               <span className="text-lg font-bold">MaxStream</span>
             </a>
             <p className="mt-3 text-sm leading-relaxed text-muted max-w-xs">
-              Free, open-source streaming app for Android and Android TV.
+              Free, open-source streaming app for Android, Android TV, and
+              Windows.
             </p>
             <div className="mt-5 flex gap-3">
               <a
-                href="https://github.com/chila254/maxstream"
+                href="https://github.com/TeamMaxStream/MaxStream"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card text-muted transition-all hover:border-brand/30 hover:text-foreground"
@@ -827,7 +901,7 @@ function Footer() {
                 <Code2 className="h-4 w-4" />
               </a>
               <a
-                href="https://github.com/chila254/maxstream/releases"
+                href="https://github.com/TeamMaxStream/MaxStream/releases"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card text-muted transition-all hover:border-brand/30 hover:text-foreground"
@@ -861,7 +935,7 @@ function Footer() {
             </h4>
             <div className="mt-4 space-y-2.5">
               <a
-                href="https://github.com/chila254/maxstream"
+                href="https://github.com/TeamMaxStream/MaxStream"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-muted transition-colors hover:text-foreground"
@@ -870,7 +944,7 @@ function Footer() {
                 Source Code
               </a>
               <a
-                href="https://github.com/chila254/maxstream/releases"
+                href="https://github.com/TeamMaxStream/MaxStream/releases"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-muted transition-colors hover:text-foreground"
@@ -879,7 +953,7 @@ function Footer() {
                 All Releases
               </a>
               <a
-                href="https://github.com/chila254/maxstream/issues"
+                href="https://github.com/TeamMaxStream/MaxStream/issues"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-muted transition-colors hover:text-foreground"

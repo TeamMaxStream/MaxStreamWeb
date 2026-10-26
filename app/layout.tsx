@@ -16,14 +16,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MaxStream — Stream Movies & Series",
   description:
-    "Stream movies and series on your phone, tablet, or Android TV. Free, fast, and ad-free.",
+    "Stream movies and series on your phone, tablet, Android TV, or Windows PC. Free, fast, and ad-free.",
   icons: {
     icon: "/app_icon.png",
   },
   openGraph: {
     title: "MaxStream — Stream Movies & Series",
     description:
-      "Stream movies and series on your phone, tablet, or Android TV. Free, fast, and ad-free.",
+      "Stream movies and series on your phone, tablet, Android TV, or Windows PC. Free, fast, and ad-free.",
     images: ["/app_icon.png"],
     type: "website",
   },
