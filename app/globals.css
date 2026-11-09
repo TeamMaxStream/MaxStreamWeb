@@ -8,6 +8,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* Keep the scroll position stable while below-the-fold reveals animate in;
+     without this the page re-anchors and the user lands mid-section. */
+  overflow-anchor: none;
 }
 
 /* Light mode (default) */
@@ -298,12 +301,27 @@ body {
 .reveal {
   opacity: 0;
   transform: translateY(30px);
-  transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Applied to the whole page if the reveal observers never ran (JS error,
+   unsupported IntersectionObserver); without it those sections stay blank. */
+.no-reveal .reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition-duration: 0.01ms;
+  }
 }
 
 /* Noise texture overlay */

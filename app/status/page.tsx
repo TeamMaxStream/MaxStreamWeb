@@ -9,11 +9,13 @@ import {
   Cpu,
   CheckCircle2,
   XCircle,
-  HelpCircle,
   Search,
-  Filter,
+  Sun,
+  Moon,
+  
 } from "lucide-react";
 import Link from "next/link";
+import { useTheme } from "@/components/theme-provider";
 
 const HEALTH_ENDPOINT =
   "https://maxstream-extractor.maxstream123.workers.dev/health";
@@ -49,29 +51,36 @@ export default function StatusPage() {
   const [filter, setFilter] = useState<"all" | "healthy" | "unhealthy">("all");
   const [search, setSearch] = useState("");
   const [countdown, setCountdown] = useState(300);
-  const fetchedRef = useRef(false);
+  const inFlight = useRef(false);
 
   const fetchHealth = useCallback(async () => {
-    if (loading && fetchedRef.current) return;
+    if (inFlight.current) return;
+    inFlight.current = true;
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(HEALTH_ENDPOINT);
+      const res = await fetch(HEALTH_ENDPOINT, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setData(json);
-      fetchedRef.current = true;
       setCountdown(300);
-    } catch (e: any) {
-      setError(e.message || "Failed to fetch status");
+    } catch (e) {
+      // Keep the last good snapshot on screen; the error banner explains that
+      // the numbers may be a few minutes old.
+      setError(
+        e instanceof Error && e.message
+          ? e.message
+          : "Failed to fetch status"
+      );
     } finally {
+      inFlight.current = false;
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchHealth();
-  }, []);
+  }, [fetchHealth]);
 
   // Auto-refresh every 5 minutes
   useEffect(() => {
@@ -93,19 +102,17 @@ export default function StatusPage() {
     activeTab === "servers" ? data?.summary?.servers : data?.summary?.extractors;
 
   // Filter and search
-  const filteredItems =
-    items?.filter((p) => {
-      if (filter === "healthy" && !p.healthy) return false;
-      if (filter === "unhealthy" && p.healthy) return false;
-      if (search) {
-        const q = search.toLowerCase();
-        return (
-          p.name.toLowerCase().includes(q) ||
-          p.domain.toLowerCase().includes(q)
-        );
-      }
-      return true;
-    }) ?? [];
+  const matches = (p: HealthProvider) => {
+    if (filter === "healthy" && !p.healthy) return false;
+    if (filter === "unhealthy" && p.healthy) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return p.name.toLowerCase().includes(q) || p.domain.toLowerCase().includes(q);
+    }
+    return true;
+  };
+  const filteredItems = items?.filter(matches) ?? [];
+  const filtered = data?.extractors?.filter(matches) ?? [];
 
   // Group extractors by kind
   const extractorGroups = data?.extractors
@@ -143,12 +150,13 @@ export default function StatusPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {data?.timestamp && (
               <span className="hidden text-xs text-muted sm:inline">
                 Next refresh in {countdown}s
               </span>
             )}
+            <ThemeToggle />
             <button
               onClick={fetchHealth}
               disabled={loading}
@@ -260,7 +268,7 @@ export default function StatusPage() {
                 }}
                 className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                   activeTab === tab
-                    ? "bg-brand text-white shadow-lg shadow-brand/20"
+                    ? "bg-brand text-white shadow-lg shadow-brand/30"
                     : "text-muted hover:text-foreground"
                 }`}
               >
@@ -309,8 +317,18 @@ export default function StatusPage() {
 
         {/* Error */}
         {error && (
-          <div className="mb-6 rounded-2xl border border-red-500/20 bg-red-500/5 p-6 text-center text-sm text-red-400">
-            {error}
+          <div className="mb-6 flex flex-col items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/5 p-6 text-center text-sm text-red-400 sm:flex-row sm:justify-between sm:text-left">
+            <span>
+              {error}
+              {data && " — showing the last successful check."}
+            </span>
+            <button
+              onClick={fetchHealth}
+              disabled={loading}
+              className="shrink-0 rounded-full border border-red-500/30 px-4 py-1.5 text-xs font-medium transition-colors hover:bg-red-500/10 disabled:opacity-50"
+            >
+              Retry
+            </button>
           </div>
         )}
 
@@ -326,8 +344,15 @@ export default function StatusPage() {
           </div>
         )}
 
+        {/* A failed first load shouldn't leave a blank page below the banner. */}
+        {!loading && !data && !error && (
+          <div className="rounded-2xl border border-border bg-card/50 p-8 text-center text-sm text-muted">
+            No status data available yet.
+          </div>
+        )}
+
         {/* Servers grid */}
-        {!loading && activeTab === "servers" && (
+        {!loading && activeTab === "servers" && data && (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filteredItems.map((p, i) => (
               <StatusCard key={`${p.domain}-${i}`} provider={p} />
@@ -379,18 +404,7 @@ export default function StatusPage() {
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                       {group.items
-                        .filter((p) => {
-                          if (filter === "healthy" && !p.healthy) return false;
-                          if (filter === "unhealthy" && p.healthy) return false;
-                          if (search) {
-                            const q = search.toLowerCase();
-                            return (
-                              p.name.toLowerCase().includes(q) ||
-                              p.domain.toLowerCase().includes(q)
-                            );
-                          }
-                          return true;
-                        })
+                        .filter(matches)
                         .map((p, i) => (
                           <StatusCard
                             key={`${p.domain}-${i}`}
@@ -400,6 +414,11 @@ export default function StatusPage() {
                     </div>
                   </div>
                 )
+            )}
+            {filtered && filtered.length === 0 && (
+              <div className="rounded-2xl border border-border bg-card/50 p-8 text-center text-sm text-muted">
+                No extractors match your search.
+              </div>
             )}
           </div>
         )}
@@ -413,6 +432,23 @@ export default function StatusPage() {
         )}
       </main>
     </div>
+  );
+}
+
+function ThemeToggle() {
+  const { theme, toggle } = useTheme();
+  return (
+    <button
+      onClick={toggle}
+      aria-label="Toggle theme"
+      className="rounded-xl border border-border bg-card p-2 text-muted transition-all hover:border-brand/30 hover:text-foreground"
+    >
+      {theme === "dark" ? (
+        <Sun className="h-4 w-4" />
+      ) : (
+        <Moon className="h-4 w-4" />
+      )}
+    </button>
   );
 }
 
