@@ -154,10 +154,24 @@ export default function Home({ stats }: { stats: RepoStats }) {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  // One download entry point: the hero, navbar, sidebar and download section
+  // all open the same dialog instead of jumping straight to one build.
+  const [downloadOpen, setDownloadOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen flex-col noise-overlay">
-      <Navbar onMenuToggle={() => setSidebarOpen((o) => !o)} />
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Navbar
+        onMenuToggle={() => setSidebarOpen((o) => !o)}
+        onDownload={() => setDownloadOpen(true)}
+      />
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        onDownload={() => {
+          setSidebarOpen(false);
+          setDownloadOpen(true);
+        }}
+      />
 
       {sidebarOpen && (
         <div
@@ -167,10 +181,14 @@ export default function Home({ stats }: { stats: RepoStats }) {
       )}
 
       <main className="flex-1">
-        <Hero stats={live} />
+        <Hero stats={live} onDownload={() => setDownloadOpen(true)} />
         <Features />
         <Screenshots />
-        <DownloadSection version={live.version} />
+        <DownloadSection
+          version={live.version}
+          open={downloadOpen}
+          onOpenChange={setDownloadOpen}
+        />
         <FAQ />
       </main>
       <Footer stats={live} />
@@ -178,7 +196,13 @@ export default function Home({ stats }: { stats: RepoStats }) {
   );
 }
 
-function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
+function Navbar({
+  onMenuToggle,
+  onDownload,
+}: {
+  onMenuToggle: () => void;
+  onDownload: () => void;
+}) {
   const { theme, toggle } = useTheme();
   const [scrolled, setScrolled] = useState(false);
 
@@ -250,12 +274,12 @@ function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
               <Moon className="h-4 w-4" />
             )}
           </button>
-          <a
-            href="#download"
+          <button
+            onClick={onDownload}
             className="hidden rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-brand-dark hover:shadow-lg hover:shadow-brand/30 sm:inline-flex"
           >
             Download
-          </a>
+          </button>
         </div>
       </div>
     </nav>
@@ -265,12 +289,15 @@ function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
 function Sidebar({
   open,
   onClose,
+  onDownload,
 }: {
   open: boolean;
   onClose: () => void;
+  onDownload: () => void;
 }) {
   return (
     <aside
+      aria-hidden={!open}
       className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-border bg-card/80 backdrop-blur-2xl transition-transform duration-300 ease-out lg:hidden ${
         open ? "translate-x-0" : "-translate-x-full"
       }`}
@@ -338,34 +365,30 @@ function Sidebar({
       </nav>
 
       <div className="border-t border-border p-4 space-y-2">
-        <a
-          href="#download"
-          onClick={onClose}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-brand-dark hover:shadow-lg hover:shadow-brand/30"
+        <button
+          onClick={onDownload}
+          className="flex w-full flex-col items-center gap-0.5 rounded-2xl bg-brand px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-brand-dark hover:shadow-lg hover:shadow-brand/30"
         >
-          <Download className="h-4 w-4" />
-          Download apps
-        </a>
-        <a
-          href={TV_APK}
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-brand/30 bg-brand/5 px-4 py-2.5 text-xs font-medium text-brand transition-all hover:bg-brand hover:text-white"
-        >
-          <Tv className="h-4 w-4" />
-          Android TV
-        </a>
-        <a
-          href={WINDOWS_MSI}
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-xs font-medium text-muted transition-all hover:border-brand/30 hover:text-foreground"
-        >
-          <MonitorPlay className="h-4 w-4" />
-          Windows PC
-        </a>
+          <span className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Download
+          </span>
+          <span className="text-[11px] font-normal text-white/80">
+            Android · Android TV · Windows
+          </span>
+        </button>
       </div>
     </aside>
   );
 }
 
-function Hero({ stats }: { stats: RepoStats }) {
+function Hero({
+  stats,
+  onDownload,
+}: {
+  stats: RepoStats;
+  onDownload: () => void;
+}) {
   return (
     <section className="relative overflow-hidden">
       {/* Animated mesh gradient background */}
@@ -414,34 +437,34 @@ function Hero({ stats }: { stats: RepoStats }) {
           to sync your watchlist, watch history, and progress everywhere.
         </p>
 
-        {/* CTA Buttons */}
+        {/* Single download CTA: the dialog then asks for the device. */}
         <div
-          className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center animate-fade-in-up"
+          className="mt-10 flex flex-col items-center gap-4 animate-fade-in-up"
           style={{ animationDelay: "300ms" }}
         >
-          <a
-            href="#download"
+          <button
+            onClick={onDownload}
             className="group relative flex w-full items-center justify-center gap-2.5 rounded-full bg-brand px-8 py-4 text-sm font-semibold text-white transition-all hover:bg-brand-dark sm:w-auto sm:text-base"
           >
             <div className="absolute inset-0 rounded-full animate-glow-ring opacity-0 transition-opacity group-hover:opacity-100" />
-            <Smartphone className="h-5 w-5" />
-            Download for Android
+            <Download className="h-5 w-5" />
+            Download for Android, Android TV & Windows
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </a>
-          <a
-            href={TV_APK}
-            className="group flex w-full items-center justify-center gap-2.5 rounded-full border border-border bg-card/50 px-8 py-4 text-sm font-semibold backdrop-blur-sm transition-all hover:border-brand/30 hover:bg-card sm:w-auto sm:text-base"
-          >
-            <Tv className="h-5 w-5" />
-            Download for Android TV
-          </a>
-          <a
-            href={WINDOWS_MSI}
-            className="group flex w-full items-center justify-center gap-2.5 rounded-full border border-border bg-card/50 px-8 py-4 text-sm font-semibold backdrop-blur-sm transition-all hover:border-brand/30 hover:bg-card sm:w-auto sm:text-base"
-          >
-            <MonitorPlay className="h-5 w-5" />
-            Download for Windows
-          </a>
+          </button>
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted">
+            <span className="inline-flex items-center gap-1.5">
+              <Smartphone className="h-3.5 w-3.5" /> Android
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Tv className="h-3.5 w-3.5" /> Android TV
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <MonitorPlay className="h-3.5 w-3.5" /> Windows
+            </span>
+            <span className={stats.version ? "" : "hidden"}>
+              {stats.version ? `v${stats.version}` : ""}
+            </span>
+          </div>
         </div>
 
         <StatsStrip stats={stats} />
@@ -684,10 +707,16 @@ function Screenshots() {
   );
 }
 
-function DownloadSection({ version }: { version: string }) {
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const closeDialog = useCallback(() => setDialogOpen(false), []);
+function DownloadSection({
+  version,
+  open: dialogOpen,
+  onOpenChange: setDialogOpen,
+}: {
+  version: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const closeDialog = useCallback(() => setDialogOpen(false), [setDialogOpen]);
 
   useEffect(() => {
     if (!dialogOpen) return;
@@ -741,7 +770,7 @@ function DownloadSection({ version }: { version: string }) {
           >
             <div className="absolute inset-0 rounded-full animate-glow-ring" />
             <Download className="h-5 w-5" />
-            Choose your download
+            Download for Android, Android TV & Windows
             <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </button>
         </RevealDiv>
